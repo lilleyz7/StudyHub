@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudyHub.Data;
+using StudyHub.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ else
     throw new Exception("Invalid environment settings");
 }
 
+builder.Services.AddIdentityApiEndpoints<CustomUser>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 var app = builder.Build();
 
@@ -37,6 +41,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.MapIdentityApi<CustomUser>();
 
 app.UseHttpsRedirection();
 
