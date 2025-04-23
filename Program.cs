@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using StudyHub.Data;
 using StudyHub.Models;
 
@@ -19,7 +20,7 @@ if(environmentProtection is null) throw new Exception("Unable to load environmen
 
 if(environmentProtection == "Development")
 {
-    var sqliteConnection = "Source Data=app.dev.db";
+    var sqliteConnection = "Data Source=app.dev.db";
     builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlite(sqliteConnection));
 } else if(environmentProtection == "Production")
@@ -40,6 +41,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.MapIdentityApi<CustomUser>();
