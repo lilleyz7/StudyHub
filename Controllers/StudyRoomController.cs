@@ -37,6 +37,29 @@ namespace StudyHub.Controllers
             return Ok(roomResult.data);
         }
 
+        [Authorize]
+        [HttpDelete("/delete-room/{roomName}")]
+        public async Task<IActionResult> DeleteRoom(string roomName)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var deleteRoomResult =  await _studyRoomService.DeleteRoom(userId, roomName);
+
+            if (deleteRoomResult.data == false)
+            {
+                return BadRequest(deleteRoomResult.error);
+            }
+
+            return Ok(deleteRoomResult.data);
+
+        }
+
+
 
     }
 }
