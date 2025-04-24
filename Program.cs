@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using StudyHub.Data;
+using StudyHub.Hubs;
 using StudyHub.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
+builder.Services.AddSignalR();
 builder.Services.AddAuthorization();
 
 var environmentProtection = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -45,6 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapIdentityApi<CustomUser>();
+app.MapHub<StudyRoomHub>("/chat");
 
 app.UseHttpsRedirection();
 
