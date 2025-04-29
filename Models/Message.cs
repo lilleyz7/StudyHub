@@ -1,7 +1,11 @@
-﻿namespace StudyHub.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StudyHub.Models
 {
     public class Message
     {
+        [Key]
+        public int Id { get; set; }
         public required string UserName { get; set; }
         public required string Text { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;

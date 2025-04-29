@@ -5,7 +5,7 @@ using StudyHub.Utils;
 
 namespace StudyHub.Services
 {
-    public class StudyRoomService
+    public class StudyRoomService : IStudyRoomService
     {
         private readonly ApplicationDbContext _context;
         public StudyRoomService(ApplicationDbContext context) 

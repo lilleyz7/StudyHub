@@ -15,6 +15,17 @@ namespace StudyHub.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<CustomUser>()
+            .HasMany(u => u.rooms)
+            .WithOne()
+            .HasForeignKey("CreatorId");
+
+            modelBuilder.Entity<CustomUser>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             modelBuilder.Entity<StudyRoom>()
                 .HasKey(r => r.RoomName); 
 

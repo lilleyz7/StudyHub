@@ -8,7 +8,6 @@ using StudyHub.Services;
 
 namespace StudyHub.Hubs
 {
-    [Authorize]
     public class StudyRoomHub: Hub
     {
         private readonly MessageService _service;

@@ -4,6 +4,7 @@ using Scalar.AspNetCore;
 using StudyHub.Data;
 using StudyHub.Hubs;
 using StudyHub.Models;
+using StudyHub.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,13 @@ else
 
 builder.Services.AddIdentityApiEndpoints<CustomUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 7;
+});
+
+builder.Services.AddScoped<IStudyRoomService, StudyRoomService>();
 
 var app = builder.Build();
 

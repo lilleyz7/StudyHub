@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StudyHub.DTO;
 using StudyHub.Services;
 using System.Security.Claims;
 
@@ -10,16 +11,16 @@ namespace StudyHub.Controllers
     [ApiController]
     public class StudyRoomController : ControllerBase
     {
-        private readonly StudyRoomService _studyRoomService;
+        private readonly IStudyRoomService _studyRoomService;
 
-        public StudyRoomController(StudyRoomService studyRoomService)
+        public StudyRoomController(IStudyRoomService studyRoomService)
         {
             _studyRoomService = studyRoomService;
         }
 
         [Authorize]
-        [HttpPost("/create-room")]
-        public async Task<IActionResult> CreateRoom([FromBody] string roomName)
+        [HttpPost("create-room")]
+        public async Task<IActionResult> CreateRoom(RoomDTO roomData)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -27,7 +28,7 @@ namespace StudyHub.Controllers
                 return Unauthorized();
             }
 
-            var roomResult = await _studyRoomService.CreateRoom(userId, roomName);
+            var roomResult = await _studyRoomService.CreateRoom(userId, roomData.roomName);
 
             if (roomResult.data == null)
             {
@@ -38,7 +39,7 @@ namespace StudyHub.Controllers
         }
 
         [Authorize]
-        [HttpDelete("/delete-room/{roomName}")]
+        [HttpDelete("delete-room/{roomName}")]
         public async Task<IActionResult> DeleteRoom(string roomName)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
