@@ -5,7 +5,7 @@ using StudyHub.Utils;
 
 namespace StudyHub.Services
 {
-    public class MessageService
+    public class MessageService: IMessageService
     {
         private readonly ApplicationDbContext _context;
 

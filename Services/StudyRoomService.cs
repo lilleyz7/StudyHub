@@ -25,6 +25,10 @@ namespace StudyHub.Services
                 return new StudyRoomServiceResponse<string>(null, "Sorry you have the maximum amount of rooms");
             }
 
+            bool roomExists = user.rooms.Any(r => r.RoomName == roomName);
+            if (roomExists)
+                return new StudyRoomServiceResponse<string>(null, "Room name already exists.");
+
             var room = new StudyRoom { CreatorId = userId, RoomName = roomName };
             await _context.StudyRooms.AddAsync(room);
 

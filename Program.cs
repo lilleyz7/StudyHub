@@ -42,9 +42,25 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 7;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // your frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddScoped<IStudyRoomService, StudyRoomService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 var app = builder.Build();
+
+app.UseRouting();
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -54,12 +70,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapIdentityApi<CustomUser>();
-app.MapHub<StudyRoomHub>("/chat");
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<StudyRoomHub>("/chat");
 
 app.Run();

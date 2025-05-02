@@ -10,30 +10,33 @@ namespace StudyHub.Hubs
 {
     public class StudyRoomHub: Hub
     {
-        private readonly MessageService _service;
+        private readonly IMessageService _service;
 
-        public StudyRoomHub(MessageService service)
+        public StudyRoomHub(IMessageService service)
         {
             _service = service;
         }
         public async Task JoinRoomAsync(string userName, string roomName)
         {
-
+            Console.WriteLine("User has joined");
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            await Clients.Group(roomName).SendAsync(userName + " has entered the chat");
+            await Clients.Group(roomName).SendAsync("UserJoined", userName + " has entered the chat");
         }
 
         public async Task SendMessageAsync(string roomName, string userName, string message)
         {
+            Console.WriteLine("Message Came in");
             MessageDTO messageToAdd = new MessageDTO(userName: userName, text: message, roomName: roomName);
             var saveSuccess = await _service.SaveMessage(messageToAdd);
 
             if (saveSuccess.isSuccessful)
             {
+                Console.WriteLine("Preparing to send message");
                 await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message);
             }
             else
             {
+                Console.WriteLine("Failed Badly");
                 await Clients.Group(roomName).SendAsync("ErrorMessage", userName, saveSuccess.error);
             }
         }
