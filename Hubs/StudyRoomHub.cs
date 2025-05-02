@@ -18,7 +18,6 @@ namespace StudyHub.Hubs
         }
         public async Task JoinRoomAsync(string userName, string roomName)
         {
-            Console.WriteLine("User has joined");
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
             await Clients.Group(roomName).SendAsync("UserJoined", userName + " has entered the chat");
         }
@@ -31,12 +30,10 @@ namespace StudyHub.Hubs
 
             if (saveSuccess.isSuccessful)
             {
-                Console.WriteLine("Preparing to send message");
                 await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message);
             }
             else
             {
-                Console.WriteLine("Failed Badly");
                 await Clients.Group(roomName).SendAsync("ErrorMessage", userName, saveSuccess.error);
             }
         }
