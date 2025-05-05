@@ -5,6 +5,8 @@ using StudyHub.Data;
 using StudyHub.Hubs;
 using StudyHub.Models;
 using StudyHub.Services;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,16 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
 builder.Services.AddAuthorization();
+
+var OpenAiKey = Environment.GetEnvironmentVariable("OpenAiKey");
+builder.Services.AddHttpClient(
+    "OpenAIClient",
+    client =>
+    {
+        client.BaseAddress = new Uri("https://api.openai.com/v1/");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", OpenAiKey);
+
+    });
 
 var environmentProtection = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -56,6 +68,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IStudyRoomService, StudyRoomService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 
 var app = builder.Build();
 
