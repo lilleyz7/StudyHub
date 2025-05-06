@@ -2,6 +2,6 @@
 {
     public interface IOpenAiService
     {
-        public Task<string> SendRequest(string message);
+        public Task<string> SendRequest(string message, string roomName);
     }
 }

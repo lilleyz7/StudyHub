@@ -2,25 +2,28 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Text;
+using StudyHub.DTO;
 
 namespace StudyHub.Services
 {
     public class OpenAiService: IOpenAiService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMessageService _messageService;
 
-        public OpenAiService(IHttpClientFactory httpClientFactory)
+        public OpenAiService(IHttpClientFactory httpClientFactory, IMessageService messageService)
         {
             _httpClientFactory = httpClientFactory;
+            _messageService = messageService;
         }
 
-        public async Task<string> SendRequest(string message)
+        public async Task<string> SendRequest(string message, string roomName)
         {
             using HttpClient client = _httpClientFactory.CreateClient("OpenAIClient");
 
             var requestBody = new
             {
-                model = "gpt-3.5-turbo",
+                model = "gpt-4.1",
                 messages = new[] {
                 new { role = "user", content = message }
             }
@@ -34,11 +37,16 @@ namespace StudyHub.Services
                 throw new Exception($"OpenAI error: {response.StatusCode} - {responseString}");
 
             var json = JsonDocument.Parse(responseString);
-            return json.RootElement
+            var jsonContent = json.RootElement
                        .GetProperty("choices")[0]
                        .GetProperty("message")
                        .GetProperty("content")
                        .GetString()!;
+
+            MessageDTO aiResponseMessage = new MessageDTO("ai", jsonContent, roomName);
+
+            await _messageService.SaveMessage(aiResponseMessage);
+            return jsonContent;
         }
     } 
 }

@@ -24,7 +24,6 @@ namespace StudyHub.Hubs
 
         public async Task SendMessageAsync(string roomName, string userName, string message)
         {
-            Console.WriteLine("Message Came in");
             MessageDTO messageToAdd = new MessageDTO(userName: userName, text: message, roomName: roomName);
             var saveSuccess = await _service.SaveMessage(messageToAdd);
 
