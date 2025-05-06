@@ -57,6 +57,17 @@ namespace StudyHub.Services
             return studyRoom.Messages.ToList();
         }
 
+        public async Task<List<Message>?> GetAISpecificMessages(string roomName)
+        {
+            var studyRoom = await _context.StudyRooms.Include(r => r.Messages).FirstOrDefaultAsync(r => r.RoomName == roomName);
+            if (studyRoom is null)
+            {
+                return null;
+            }
+
+            var aiMessages = studyRoom.Messages.Where(m => m.UserName == "ai");
+            return aiMessages.ToList();
+        }
         public async Task<HubResponse> DeleteMessage(int messageId)
         {
             var messageToDelete = await _context.Messages.FindAsync(messageId);
@@ -76,5 +87,6 @@ namespace StudyHub.Services
 
             return new HubResponse(true, null);
         }
+
     }
 }
