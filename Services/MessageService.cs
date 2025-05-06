@@ -1,4 +1,5 @@
-﻿using StudyHub.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyHub.Data;
 using StudyHub.DTO;
 using StudyHub.Models;
 using StudyHub.Utils;
@@ -40,6 +41,40 @@ namespace StudyHub.Services
 
             return new HubResponse(true, null);
 
+        }
+
+        //need to paginate
+        public async Task<List<Message>?> GetMessages(string roomName)
+        {
+            var studyRoom = await _context.StudyRooms
+                .Include(r => r.Messages)
+                .FirstOrDefaultAsync(m => m.RoomName == roomName);
+            if (studyRoom is null)
+            {
+                return null;
+            }
+
+            return studyRoom.Messages.ToList();
+        }
+
+        public async Task<HubResponse> DeleteMessage(int messageId)
+        {
+            var messageToDelete = await _context.Messages.FindAsync(messageId);
+            if (messageToDelete is null)
+            {
+                return new HubResponse(false, "message does not exist");
+            }
+
+            _context.Messages.Remove(messageToDelete);
+
+            int changesMade = await _context.SaveChangesAsync();
+
+            if (changesMade < 1)
+            {
+                return new HubResponse(false, "Failed to delete message");
+            }
+
+            return new HubResponse(true, null);
         }
     }
 }
