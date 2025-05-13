@@ -51,6 +51,7 @@ dotnet run
 - Repository Pattern
 - Interface Pattern
 - Dependency Injection
+- Entity Framework Core
 - Identity JWT authentication and authorization
 - SignalR Hubs
 - Real-time communication
