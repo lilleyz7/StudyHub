@@ -23,7 +23,7 @@ namespace StudyHub.Services
 
             var requestBody = new
             {
-                model = "gpt-4.1",
+                model = "gpt-4o-mini",
                 messages = new[] {
                 new { role = "user", content = message }
             }

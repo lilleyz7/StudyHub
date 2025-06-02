@@ -21,7 +21,7 @@ namespace StudyHub.Hubs
         public async Task JoinRoomAsync(string userName, string roomName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            await Clients.Group(roomName).SendAsync("UserJoined", userName + " has entered the chat");
+            await Clients.Group(roomName).SendAsync("UserJoined", userName);
         }
 
         public async Task SendMessageAsync(string roomName, string userName, string message)
@@ -51,16 +51,17 @@ namespace StudyHub.Hubs
 
         }
 
-        public async Task<string?> SendAiRequestAsync(string prompt, string roomName)
+        public async Task SendAiRequestAsync(string roomName, string inputContent)
         {
+            String prompt = $"You are an ai agent for helping students study. Can you answer the following question if it is appropriate: {inputContent}";
             try
             {
                 var result = await _openAiService.SendRequest(prompt, roomName);
-                return result;
+                await Clients.Group(roomName).SendAsync("ReceiveMessage", "ai", result);
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                await Clients.Group(roomName).SendAsync("ErrorMessage", "error", ex + "");
             }
             
         }

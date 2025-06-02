@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -18,7 +19,15 @@ builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
 builder.Services.AddAuthorization();
 
+Env.Load();
+
 var OpenAiKey = Environment.GetEnvironmentVariable("OpenAiKey");
+
+if (string.IsNullOrEmpty(OpenAiKey))
+{
+    throw new ArgumentNullException(nameof(OpenAiKey));
+}
+
 builder.Services.AddHttpClient(
     "OpenAIClient",
     client =>
@@ -59,7 +68,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000") // your frontend URL
+            .WithOrigins("http://localhost:3000") 
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
