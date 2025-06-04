@@ -1,5 +1,6 @@
 using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using StudyHub.Data;
@@ -8,6 +9,7 @@ using StudyHub.Models;
 using StudyHub.Services;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,18 @@ if (string.IsNullOrEmpty(OpenAiKey))
 {
     throw new ArgumentNullException(nameof(OpenAiKey));
 }
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("production", opt =>
+    {
+        opt.PermitLimit = 4;
+        opt.Window = TimeSpan.FromSeconds(12);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+});
+
 
 builder.Services.AddHttpClient(
     "OpenAIClient",
@@ -90,6 +104,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseRateLimiter();
 
 app.MapIdentityApi<CustomUser>();
 

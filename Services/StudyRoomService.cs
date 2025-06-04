@@ -63,5 +63,16 @@ namespace StudyHub.Services
 
             return new StudyRoomServiceResponse<bool>(true, null);
         }
+
+        public async Task<bool> IsNameAvailble(string roomName)
+        {
+            StudyRoom? room = await _context.StudyRooms.FirstOrDefaultAsync(r => r.RoomName == roomName);
+            if (room is null)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

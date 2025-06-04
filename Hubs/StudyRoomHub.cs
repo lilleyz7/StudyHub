@@ -5,9 +5,12 @@ using StudyHub.Models;
 using StudyHub.Data;
 using StudyHub.DTO;
 using StudyHub.Services;
+using Microsoft.AspNetCore.RateLimiting;
+
 
 namespace StudyHub.Hubs
 {
+    [EnableRateLimiting("production")]
     public class StudyRoomHub: Hub
     {
         private readonly IMessageService _messageServive;
@@ -22,6 +25,18 @@ namespace StudyHub.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
             await Clients.Group(roomName).SendAsync("UserJoined", userName);
+            List<Message>? messages = await _messageServive.GetMessages(roomName);
+            if(messages is null)
+            {
+                return;
+            }
+
+            List<MessageDTO> previousMessages = new List<MessageDTO>();
+            foreach (var message in messages) {
+
+            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", message.UserName, message.Text);
+            }
+
         }
 
         public async Task SendMessageAsync(string roomName, string userName, string message)
@@ -39,17 +54,18 @@ namespace StudyHub.Hubs
             }
         }
 
+        [DisableRateLimiting]
         public Task LeaveRoomAsync(string roomName)
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
         }
 
-        public async Task GetAiMessagesAsync(string roomName)
-        {
-            var messages = await _messageServive.GetAISpecificMessages(roomName);
-            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveBulkMessages", messages);
+        //public async Task GetRoomMessages(string roomName)
+        //{
+        //    var messages = await _messageServive.GetMessages(roomName);
+        //    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveBulkMessages", messages);
 
-        }
+        //}
 
         public async Task SendAiRequestAsync(string roomName, string inputContent)
         {

@@ -9,5 +9,6 @@ namespace StudyHub.Services
         public Task<StudyRoomServiceResponse<string>> CreateRoom(string userId, string roomName);
 
         public Task<StudyRoomServiceResponse<bool>> DeleteRoom(string userId, string roomName);
+        public Task<bool> IsNameAvailble(string roomName);
     }
 }
