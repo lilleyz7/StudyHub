@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BCrypt.Net;
+using Microsoft.EntityFrameworkCore;
 using StudyHub.Data;
 using StudyHub.Models;
 using StudyHub.Utils;
+using System.Reflection.Metadata.Ecma335;
 
 namespace StudyHub.Services
 {
@@ -13,7 +15,7 @@ namespace StudyHub.Services
             _context = context;
         }
 
-        public async Task<StudyRoomServiceResponse<string>> CreateRoom(string userId, string roomName)
+        public async Task<StudyRoomServiceResponse<string>> CreateRoom(string userId, string roomName, string username, string password)
         {
             var user = await _context.Users.Include(p => p.rooms).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
@@ -29,7 +31,12 @@ namespace StudyHub.Services
             if (roomExists)
                 return new StudyRoomServiceResponse<string>(null, "Room name already exists.");
 
-            var room = new StudyRoom { CreatorId = userId, RoomName = roomName };
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var room = new StudyRoom { CreatorId = userId, RoomName = roomName, Password = hashedPassword};
+
+            room.RoomMembers.Add(userId, username);
+
             await _context.StudyRooms.AddAsync(room);
 
             int isSuccessful = await _context.SaveChangesAsync();
@@ -64,10 +71,27 @@ namespace StudyHub.Services
             return new StudyRoomServiceResponse<bool>(true, null);
         }
 
+        public async Task<StudyRoomServiceResponse<bool>> JoinRoom(JoinRoomParams parameters)
+        {
+            var room = await _context.StudyRooms.Include(r => r.RoomMembers).FirstAsync(r => r.RoomName == parameters.RoomName);
+            if(room is null)
+            {
+                return new StudyRoomServiceResponse<bool>(false, "Invalid room");
+            }
+
+            if(BCrypt.Net.BCrypt.Verify(parameters.Password, room.Password) == false){
+                return new StudyRoomServiceResponse<bool>(false, "Invalid password");
+            }
+
+            room.RoomMembers.Add(parameters.UserId, parameters.Username);
+
+            return new StudyRoomServiceResponse<bool>(true, null);
+        }
+
         public async Task<bool> IsNameAvailble(string roomName)
         {
             StudyRoom? room = await _context.StudyRooms.FirstOrDefaultAsync(r => r.RoomName == roomName);
-            if (room is null)
+            if (room is null) 
             {
                 return true;
             }

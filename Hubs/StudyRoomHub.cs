@@ -13,28 +13,28 @@ namespace StudyHub.Hubs
     [EnableRateLimiting("production")]
     public class StudyRoomHub: Hub
     {
-        private readonly IMessageService _messageServive;
+        private readonly IMessageService _messageService;
         private readonly IOpenAiService _openAiService;
 
         public StudyRoomHub(IMessageService service, IOpenAiService openAiService)
         {
-            _messageServive = service;
+            _messageService = service;
             _openAiService = openAiService;
         }
         public async Task JoinRoomAsync(string userName, string roomName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
             await Clients.Group(roomName).SendAsync("UserJoined", userName);
-            List<Message>? messages = await _messageServive.GetMessages(roomName);
+            List<Message>? messages = await _messageService.GetMessages(roomName);
             if(messages is null)
             {
                 return;
             }
 
             List<MessageDTO> previousMessages = new List<MessageDTO>();
-            foreach (var message in messages) {
 
-            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", message.UserName, message.Text);
+            foreach (var message in messages) {
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", message.UserName, message.Text);
             }
 
         }
@@ -42,7 +42,7 @@ namespace StudyHub.Hubs
         public async Task SendMessageAsync(string roomName, string userName, string message)
         {
             MessageDTO messageToAdd = new MessageDTO(userName: userName, text: message, roomName: roomName);
-            var saveSuccess = await _messageServive.SaveMessage(messageToAdd);
+            var saveSuccess = await _messageService.SaveMessage(messageToAdd);
 
             if (saveSuccess.isSuccessful)
             {
@@ -62,7 +62,7 @@ namespace StudyHub.Hubs
 
         //public async Task GetRoomMessages(string roomName)
         //{
-        //    var messages = await _messageServive.GetMessages(roomName);
+        //    var messages = await _messageService.GetMessages(roomName);
         //    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveBulkMessages", messages);
 
         //}

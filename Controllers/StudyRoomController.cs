@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using StudyHub.DTO;
 using StudyHub.Services;
 using System.Security.Claims;
+using BCrypt;
+using StudyHub.Utils;
 
 namespace StudyHub.Controllers
 {
@@ -36,7 +38,7 @@ namespace StudyHub.Controllers
                 return Conflict("Room already taken");
             }
 
-            var roomResult = await _studyRoomService.CreateRoom(userId, roomData.roomName);
+            var roomResult = await _studyRoomService.CreateRoom(userId, roomData.roomName, roomData.username, roomData.password);
 
             if (roomResult.data == null)
             {
@@ -44,6 +46,25 @@ namespace StudyHub.Controllers
             }
 
             return Ok(roomResult.data);
+        }
+
+        [Authorize]
+        [HttpPost("/join-room")]
+        public async Task<IActionResult> JoinRoom(JoinRoomParams parameters)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var serviceResponse = await _studyRoomService.JoinRoom(parameters);
+            if (!serviceResponse.data)
+            {
+                return BadRequest(serviceResponse.error);
+            }
+
+            return Ok("Successfully Joined");
         }
 
         [Authorize]
